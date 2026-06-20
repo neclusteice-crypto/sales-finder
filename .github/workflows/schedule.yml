@@ -1,0 +1,32 @@
+name: 営業先候補 自動収集（朝・夜）
+
+on:
+  schedule:
+    - cron: '0 21 * * *'
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+
+jobs:
+  find-leads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python 3.11 セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 依存ライブラリをインストール
+        run: pip install -r requirements.txt
+
+      - name: 営業先候補を収集・保存
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+        run: python search_and_save.py
